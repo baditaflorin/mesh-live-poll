@@ -1,6 +1,3 @@
-/* App-local styles. Mesh chrome (settings drawer, self-ref bar) is provided by
- * @baditaflorin/mesh-common/styles.css imported in main.tsx. */
-
 :root {
   color-scheme: dark;
 }
@@ -22,30 +19,194 @@ body,
   -webkit-tap-highlight-color: transparent;
 }
 
-.feature-placeholder {
-  padding: 6rem 1.5rem 2rem;
-  text-align: center;
+.poll-screen {
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: 4.5rem 1.25rem 6rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 1rem;
 }
 
-.feature-placeholder h1 {
+.poll-header h1 {
   font-size: 1.6rem;
-  margin: 0;
+  margin: 0 0 0.25rem;
   color: var(--mesh-accent);
 }
 
-.feature-placeholder p {
-  max-width: 32rem;
+.poll-status {
   margin: 0;
-  opacity: 0.85;
-  line-height: 1.5;
+  opacity: 0.7;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
 }
 
-.feature-status {
-  font-size: 0.85rem;
-  opacity: 0.6;
+.poll-q-display {
+  display: block;
+  width: 100%;
+  padding: 0.9rem 1rem;
+  font-size: 1.05rem;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--mesh-fg);
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.poll-q-display em {
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.poll-q-edit {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.poll-q-edit input {
+  flex: 1;
+  padding: 0.7rem 0.9rem;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--mesh-fg);
+  border: 1px solid var(--mesh-accent);
+  border-radius: 0.4rem;
+}
+
+.poll-q-edit button {
+  padding: 0.5rem 0.8rem;
+  background: transparent;
+  color: var(--mesh-fg);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+
+.poll-name input {
+  width: 100%;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--mesh-fg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.5rem;
+}
+
+.poll-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.poll-empty {
+  opacity: 0.5;
+  font-style: italic;
+  text-align: center;
+}
+
+.poll-option {
+  display: flex;
+  align-items: stretch;
+  gap: 0.4rem;
+}
+
+.poll-option-btn {
+  position: relative;
+  flex: 1;
+  padding: 0.85rem 1rem;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--mesh-fg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.45rem;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+}
+
+.poll-option-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.poll-option.is-mine .poll-option-btn {
+  border-color: var(--mesh-accent);
+}
+
+.poll-option-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: rgba(91, 141, 239, 0.22);
+  z-index: 0;
+  transition: width 0.3s ease;
+}
+
+.poll-option.is-mine .poll-option-bar {
+  background: rgba(91, 141, 239, 0.42);
+}
+
+.poll-option-label {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+}
+
+.poll-option-count {
+  position: relative;
+  z-index: 1;
+  opacity: 0.75;
   font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+}
+
+.poll-option-rm {
+  width: 2.4rem;
+  background: transparent;
+  color: var(--mesh-fg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-size: 1.2rem;
+  opacity: 0.5;
+}
+
+.poll-option-rm:hover {
+  opacity: 1;
+  border-color: rgba(255, 90, 90, 0.6);
+  color: #ff6b6b;
+}
+
+.poll-add {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.poll-add input {
+  flex: 1;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--mesh-fg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.4rem;
+}
+
+.poll-add button {
+  padding: 0.5rem 1rem;
+  background: var(--mesh-accent);
+  color: #0e1117;
+  border: none;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.poll-add button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
