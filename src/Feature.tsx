@@ -1,11 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import type { MeshConfig, YRoom } from "@baditaflorin/mesh-common";
+import { useEffect, useState } from "react";
+import { useNamedPeer, useVotes, type MeshConfig, type YRoom } from "@baditaflorin/mesh-common";
 
 type Props = { room: YRoom | null; config: MeshConfig };
-
 type Option = { id: string; label: string };
-
-const NAME_KEY = (prefix: string) => `${prefix}:displayName`;
 
 const newId = () => Math.random().toString(36).slice(2, 10);
 
@@ -22,59 +19,31 @@ export function Feature({ room, config }: Props) {
 }
 
 function Body({ room, config }: { room: YRoom; config: MeshConfig }) {
-  const [name, setName] = useState(
-    () => localStorage.getItem(NAME_KEY(config.storagePrefix)) ?? "",
-  );
+  // primitives #1 + #4: name + votes
+  const { name, setName } = useNamedPeer(config, room);
+  const votes = useVotes<string>(room, "votes");
+
   const [newOption, setNewOption] = useState("");
   const [questionDraft, setQuestionDraft] = useState("");
   const [editingQ, setEditingQ] = useState(false);
   const [, rerender] = useState(0);
 
   useEffect(() => {
-    if (name) localStorage.setItem(NAME_KEY(config.storagePrefix), name);
-  }, [name, config.storagePrefix]);
-
-  useEffect(() => {
     const options = room.doc.getArray<Option>("options");
-    const votes = room.doc.getMap<string>("votes");
     const meta = room.doc.getMap<string>("meta");
-    const onChange = () => rerender((n) => n + 1);
-    options.observeDeep(onChange);
-    votes.observe(onChange);
-    meta.observe(onChange);
+    const cb = () => rerender((n) => n + 1);
+    options.observeDeep(cb);
+    meta.observe(cb);
     return () => {
-      options.unobserveDeep(onChange);
-      votes.unobserve(onChange);
-      meta.unobserve(onChange);
+      options.unobserveDeep(cb);
+      meta.unobserve(cb);
     };
   }, [room]);
 
   const options = room.doc.getArray<Option>("options");
-  const votes = room.doc.getMap<string>("votes");
   const meta = room.doc.getMap<string>("meta");
   const question = meta.get("question") ?? "";
-
-  const optionList = useMemo(() => options.toArray(), [room, options.length]);
-
-  const tally = useMemo(() => {
-    const counts = new Map<string, number>();
-    votes.forEach((optId) => counts.set(optId, (counts.get(optId) ?? 0) + 1));
-    return counts;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room, votes.size, options.length]);
-
-  const myVote = votes.get(room.peerId);
-  const totalVotes = votes.size;
-  const inRoom = room.peerCount + 1;
-
-  const vote = (optId: string) => {
-    if (!name.trim()) return;
-    if (votes.get(room.peerId) === optId) {
-      votes.delete(room.peerId);
-    } else {
-      votes.set(room.peerId, optId);
-    }
-  };
+  const optionList = options.toArray();
 
   const addOption = () => {
     const label = newOption.trim();
@@ -87,20 +56,14 @@ function Body({ room, config }: { room: YRoom; config: MeshConfig }) {
     room.doc.transact(() => {
       const idx = options.toArray().findIndex((o) => o.id === id);
       if (idx >= 0) options.delete(idx, 1);
-      votes.forEach((v, k) => {
-        if (v === id) votes.delete(k);
-      });
     });
+    if (votes.myVote === id) votes.unvote();
   };
 
-  const saveQuestion = () => {
-    meta.set("question", questionDraft.trim());
-    setEditingQ(false);
-  };
-
-  const startEditQ = () => {
-    setQuestionDraft(question);
-    setEditingQ(true);
+  const handleVote = (optId: string) => {
+    if (!name.trim()) return;
+    if (votes.myVote === optId) votes.unvote();
+    else votes.vote(optId);
   };
 
   return (
@@ -108,7 +71,8 @@ function Body({ room, config }: { room: YRoom; config: MeshConfig }) {
       <header className="poll-header">
         <h1>live poll</h1>
         <p className="poll-status">
-          {totalVotes} {totalVotes === 1 ? "vote" : "votes"} · {inRoom} present
+          {votes.totalVotes} {votes.totalVotes === 1 ? "vote" : "votes"} · {room.peerCount + 1}{" "}
+          present
         </p>
       </header>
 
@@ -117,7 +81,8 @@ function Body({ room, config }: { room: YRoom; config: MeshConfig }) {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              saveQuestion();
+              meta.set("question", questionDraft.trim());
+              setEditingQ(false);
             }}
             className="poll-q-edit"
           >
@@ -134,7 +99,14 @@ function Body({ room, config }: { room: YRoom; config: MeshConfig }) {
             </button>
           </form>
         ) : (
-          <button type="button" className="poll-q-display" onClick={startEditQ}>
+          <button
+            type="button"
+            className="poll-q-display"
+            onClick={() => {
+              setQuestionDraft(question);
+              setEditingQ(true);
+            }}
+          >
             {question || <em>tap to set a question</em>}
           </button>
         )}
@@ -155,15 +127,15 @@ function Body({ room, config }: { room: YRoom; config: MeshConfig }) {
           <p className="poll-empty">no options yet — add one below</p>
         ) : (
           optionList.map((opt) => {
-            const count = tally.get(opt.id) ?? 0;
-            const pct = totalVotes === 0 ? 0 : Math.round((count / totalVotes) * 100);
-            const isMine = myVote === opt.id;
+            const count = votes.tally.get(opt.id) ?? 0;
+            const pct = votes.pctOf(opt.id);
+            const isMine = votes.myVote === opt.id;
             return (
               <div key={opt.id} className={`poll-option ${isMine ? "is-mine" : ""}`}>
                 <button
                   type="button"
                   className="poll-option-btn"
-                  onClick={() => vote(opt.id)}
+                  onClick={() => handleVote(opt.id)}
                   disabled={!name.trim()}
                 >
                   <span className="poll-option-bar" style={{ width: `${pct}%` }} />
