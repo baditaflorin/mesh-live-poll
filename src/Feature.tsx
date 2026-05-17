@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { useNamedPeer, useVotes, type MeshConfig, type YRoom } from "@baditaflorin/mesh-common";
+import {
+  MeshNameInput,
+  useNamedPeer,
+  useVotes,
+  type MeshConfig,
+  type YRoom,
+} from "@baditaflorin/mesh-common";
 
 type Props = { room: YRoom | null; config: MeshConfig };
 type Option = { id: string; label: string };
@@ -112,15 +118,13 @@ function Body({ room, config }: { room: YRoom; config: MeshConfig }) {
         )}
       </div>
 
-      <div className="poll-name">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="your name"
-          maxLength={48}
-          aria-label="your name"
-        />
-      </div>
+      <MeshNameInput
+        value={name}
+        onChange={setName}
+        placeholder="your name"
+        maxLength={48}
+        className="poll-name"
+      />
 
       <section className="poll-options" aria-label="options">
         {optionList.length === 0 ? (
