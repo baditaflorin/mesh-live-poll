@@ -1,7 +1,7 @@
 # mesh-live-poll
 
 [![pages](https://img.shields.io/badge/live-baditaflorin.github.io%2Fmesh-live-poll-5b8def)](https://baditaflorin.github.io/mesh-live-poll/)
-[![version](https://img.shields.io/badge/version-0.1.0-blue)](https://github.com/baditaflorin/mesh-live-poll/blob/main/package.json)
+[![version](https://img.shields.io/badge/version-0.1.1-blue)](https://github.com/baditaflorin/mesh-live-poll/blob/main/package.json)
 [![license](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 
 > Live multi-option poll with bar chart, no account, mesh-synced
