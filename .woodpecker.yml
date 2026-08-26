@@ -1,0 +1,17 @@
+# Validate native GitHub push and pull-request events in the fleet.
+# This runs server-side; it is not a local Git hook.
+when:
+  - event: [push, pull_request]
+
+steps:
+  verify:
+    image: node:22-bookworm
+    commands:
+      - git clone --depth 1 https://github.com/baditaflorin/mesh-common.git ../mesh-common
+      - npm ci --prefix ../mesh-common
+      - npm ci
+      - npx playwright install --with-deps chromium
+      - npm run fmt:check
+      - npm run typecheck
+      - CI=true npm run test
+      - npm run build
